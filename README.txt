@@ -10,7 +10,7 @@ npm i hstore
 npm i dotenv
 npm i cors
 
-Requisição teste back-end utilizando Insomnia -> http://localhost:5000/teste
+Requisição (GET) teste back-end utilizando Insomnia -> http://localhost:5000/teste
 
 !ATENÇÃO!
 Subir as alertações sem a pasta NODE_MODULES
