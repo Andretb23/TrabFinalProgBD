@@ -15,7 +15,8 @@ const Usuario = banco.define("usuario", {
     },
     login: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     senha: {
         type: Sequelize.STRING,
@@ -27,7 +28,7 @@ const Usuario = banco.define("usuario", {
     },
     ativo: {
         type: Sequelize.BOOLEAN,
-         defaultValue: true
+        defaultValue: true
     
     }
 });

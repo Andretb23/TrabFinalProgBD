@@ -3,6 +3,8 @@ import banco from "./banco.js";
 
 import cors from "cors";
 
+import usuario from "./controller/Usuario.js";
+
 try {
     await banco.authenticate();
     console.log('Connection has been established successfully.');
@@ -19,5 +21,11 @@ app.get('/teste', (request, response) => {
 });
 
 
+app.get("/usuario", usuario.listar_usuario);
+app.get("/usuario/:id_usuario", usuario.selecionar_usuario);
+app.post("/usuario/", usuario.cadastrar_usuario);
+app.put("/usuario/:id_usuario", usuario.alterar_usuario);
+app.delete("/usuario/:id_usuario", usuario.deletar_usuario);
+ 
 
 app.listen(5000);
