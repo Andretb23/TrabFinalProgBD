@@ -18,7 +18,7 @@ CREATE TABLE tipo_usuario (
 CREATE TABLE item_cardapio (
     id_item_cardapio SERIAL PRIMARY KEY,
     descricao_item VARCHAR(255),
-    nome_item VARCHAR(100) NOT NULL,
+    nome_item VARCHAR(100) NOT NULL UNIQUE, --alterado
     tipo_item INT NOT NULL,
     preco NUMERIC(10, 2) NOT NULL
 );
@@ -26,7 +26,7 @@ CREATE TABLE item_cardapio (
 -- 4. Tabela de Cardápio
 CREATE TABLE cardapio (
     id_cardapio SERIAL PRIMARY KEY,
-    descricao_cardapio VARCHAR(255) NOT NULL,
+    descricao_cardapio VARCHAR(255) NOT NULL UNIQUE, --alterado
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
