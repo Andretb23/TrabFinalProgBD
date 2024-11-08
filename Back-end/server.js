@@ -5,6 +5,8 @@ import cors from "cors";
 
 import usuario from "./controller/Usuario.js";
 import cardapio from "./controller/Cardapio.js";
+import itemCardapio from "./controller/ItemCardapio.js";
+
 
 try {
     await banco.authenticate();
@@ -34,6 +36,13 @@ app.get("/cardapio/:id_cardapio", cardapio.selecionar_cardapio);
 app.post("/cardapio/", cardapio.cadastrar_cardapio);
 app.put("/cardapio/:id_cardapio", cardapio.alterar_cardapio);
 app.delete("/cardapio/:id_cardapio", cardapio.deletar_cardapio);
+
+
+app.get("/itemcardapio", itemCardapio.listar_itemCardapio);
+app.get("/itemcardapio/:id_item_cardapio", itemCardapio.selecionar_itemCardapio);
+app.post("/itemcardapio/", itemCardapio.cadastrar_itemCardapio);
+app.put("/itemcardapio/:id_item_cardapio", itemCardapio.alterar_itemCardapio);
+app.delete("/itemcardapio/:id_item_cardapio", itemCardapio.deletar_itemCardapio);
  
 
 app.listen(5000);
