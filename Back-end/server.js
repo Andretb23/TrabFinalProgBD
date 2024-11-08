@@ -6,6 +6,7 @@ import cors from "cors";
 import usuario from "./controller/Usuario.js";
 import cardapio from "./controller/Cardapio.js";
 import itemCardapio from "./controller/ItemCardapio.js";
+import comanda from "./controller/Comanda.js";
 
 
 try {
@@ -43,6 +44,13 @@ app.get("/itemcardapio/:id_item_cardapio", itemCardapio.selecionar_itemCardapio)
 app.post("/itemcardapio/", itemCardapio.cadastrar_itemCardapio);
 app.put("/itemcardapio/:id_item_cardapio", itemCardapio.alterar_itemCardapio);
 app.delete("/itemcardapio/:id_item_cardapio", itemCardapio.deletar_itemCardapio);
+
+
+app.get("/comanda", comanda.listar_comanda);
+app.get("/comanda/:id_comanda", comanda.selecionar_comanda);
+app.post("/comanda/", comanda.cadastrar_comanda);
+app.put("/comanda/:id_comanda", comanda.alterar_comanda);
+app.delete("/comanda/:id_comanda", comanda.deletar_comanda);
  
 
 app.listen(5000);
