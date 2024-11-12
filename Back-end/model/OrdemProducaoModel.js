@@ -10,7 +10,7 @@ const OrdemProducao = banco.define("ordem_producao", {
         allowNull: false
     },
     data_pedido: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         allowNull: false
     },
     id_item_comanda: {

@@ -14,11 +14,11 @@ const Comanda = banco.define("comanda", {
         allowNull: false
     },
     data_abertura: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         allowNull: false
     },
     data_fechamento: {
-        type: Sequelize.TIME
+        type: Sequelize.DATE
     },
     status: {
         type: Sequelize.BOOLEAN,
