@@ -9,6 +9,7 @@ import itemCardapio from "./controller/ItemCardapio.js";
 import comanda from "./controller/Comanda.js";
 import itemCardapioCardapio from "./controller/ItemCardapioCardapio.js";
 import itemComanda from "./controller/ItemComanda.js";
+import ordemProducao from "./controller/OrdemProducao.js";
 
 
 try {
@@ -67,6 +68,14 @@ app.get("/itemComanda/:id_item_comanda", itemComanda.selecionar_itemComanda);
 app.post("/itemComanda/", itemComanda.cadastrar_itemComanda);
 app.put("/itemComanda/:id_item_comanda", itemComanda.alterar_itemComanda);
 app.delete("/itemComanda/:id_item_comanda", itemComanda.deletar_itemComanda);
+
+
+
+app.get("/ordemProducao", ordemProducao.listar_ordemProducao);
+app.get("/ordemProducao/:id_ordem_producao", ordemProducao.selecionar_ordemProducao);
+app.post("/ordemProducao/", ordemProducao.cadastrar_ordemProducao);
+app.put("/ordemProducao/:id_ordem_producao", ordemProducao.alterar_ordemProducao);
+app.delete("/ordemProducao/:id_ordem_producao", ordemProducao.deletar_ordemProducao);
 
 
 app.listen(5000);
