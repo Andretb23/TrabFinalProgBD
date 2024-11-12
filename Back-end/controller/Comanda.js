@@ -17,7 +17,7 @@ async function selecionar_comanda(req, res){
 
 async function cadastrar_comanda(req, res){
 
-    let hoje = moment().format("YYYY-MM-DD HH:mm:ss.SSS");
+    let hoje = moment().format("YYYY-MM-DD HH:mm:ss");
 
     if (!req.body.nome_cliente)
         res.status(500).send("Parametro nome_cliente é obrigatório.");
