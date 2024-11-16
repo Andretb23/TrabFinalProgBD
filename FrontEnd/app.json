@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "FrontEnd",
+    "slug": "front-end",
+    "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
+    "sdkVersion": "49.0.0",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "com.yourname.frontend"
+    },
+    "android": {
+      "package": "com.yourname.frontend"
+    },
+    "web": {
+      "build": {
+        "babel": {
+          "plugins": [
+            "@react-native/web"
+          ]
+        }
+      }
+    }
+  }
+}
