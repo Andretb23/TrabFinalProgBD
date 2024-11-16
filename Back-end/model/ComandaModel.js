@@ -2,35 +2,29 @@ import { Sequelize } from "sequelize";
 import banco from "../banco.js";
 
 
-const Usuario = banco.define("usuario", {
-    id_usuario: {
+const Comanda = banco.define("comanda", {
+    id_comanda: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
     },
-    nome: {
+    nome_cliente: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    login: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-    },
-    senha: {
-        type: Sequelize.STRING,
+    data_abertura: {
+        type: Sequelize.DATE,
         allowNull: false
     },
-    tipo_usuario: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+    data_fechamento: {
+        type: Sequelize.DATE
     },
-    ativo: {
+    status: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: true
-    
     }
 });
 
-export default Usuario;
+export default Comanda;

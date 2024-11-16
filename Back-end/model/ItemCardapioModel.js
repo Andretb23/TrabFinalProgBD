@@ -2,35 +2,29 @@ import { Sequelize } from "sequelize";
 import banco from "../banco.js";
 
 
-const Usuario = banco.define("usuario", {
-    id_usuario: {
+const ItemCardapio = banco.define("item_cardapio", {
+    id_item_cardapio: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
     },
-    nome: {
+    descricao_item: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    login: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-    },
-    senha: {
+    nome_item: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    tipo_usuario: {
+    tipo_item: {
         type: Sequelize.INTEGER,
         allowNull: false
     },
-    ativo: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-    
+    preco: {
+        type: Sequelize.NUMERIC,
+        allowNull: false
     }
 });
 
-export default Usuario;
+export default ItemCardapio;
