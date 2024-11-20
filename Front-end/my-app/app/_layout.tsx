@@ -11,9 +11,13 @@ export default function RootLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-      }}>
+      }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="comanda" />
+      <Stack.Screen name="cozinha" />
+      <Stack.Screen name="copa" />
     </Stack>
   );
 }
