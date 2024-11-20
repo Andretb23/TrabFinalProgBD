@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Picker } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { useRouter } from "expo-router";
+import { Picker } from '@react-native-picker/picker'; // Importação correta do Picker
 
 export default function Login() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -64,7 +65,7 @@ export default function Login() {
             <Text style={styles.label}>Tipo de Usuário</Text>
             <Picker
               selectedValue={selectedUserType}
-              onValueChange={(itemValue) => setSelectedUserType(itemValue)}
+              onValueChange={(itemValue: string) => setSelectedUserType(itemValue)} // Tipando 'itemValue'
               style={styles.picker}
             >
               <Picker.Item label="Administrador (1)" value="1" />
