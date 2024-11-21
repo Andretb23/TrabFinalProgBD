@@ -9,6 +9,8 @@ npm i pg
 npm i hstore
 npm i dotenv
 npm i cors
+npm i axios
+
 
 Requisição (GET) teste back-end utilizando Insomnia -> http://localhost:5000/teste
 
