@@ -1,37 +1,75 @@
-// TELA HOME
-import React from "react";
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity , ScrollView} from "react-native";
 import { useRouter } from "expo-router";
-
-const items = [
-  { id: 1, nome: "Coca-Cola", preco: 5.0, imagem: "https://via.placeholder.com/150" },
-  { id: 2, nome: "Filé Mignon ao Molho Madeira", preco: 30.0, imagem: "https://via.placeholder.com/150" },
-  { id: 3, nome: "Frango à Parmegiana", preco: 25.0, imagem: "https://via.placeholder.com/150" },
-  { id: 4, nome: "Suco de Laranja", preco: 6.0, imagem: "https://via.placeholder.com/150" },
-  { id: 5, nome: "Lasanha de Carne", preco: 28.0, imagem: "https://via.placeholder.com/150" },
-  { id: 6, nome: "Cerveja Pilsen", preco: 8.0, imagem: "https://via.placeholder.com/150" },
-];
+import axios from "axios";
 
 export default function Home() {
+  const [dados, setDados] = useState([]); // Estado movido para dentro do componente
   const router = useRouter();
 
+  const listar = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/itemcardapio");
+      setDados(data); // Atualiza o estado com os dados da API
+      console.log(data);
+    } catch (error) {
+      console.error("Erro ao buscar os dados: ", error);
+    }
+  };
+
+  useEffect(() => {
+    listar(); // Chama o método ao carregar a tela
+  }, []);
+
+  // Filtrar apenas itens do tipo '1' (bebidas)
+  const bebidas = dados.filter((item) => item.tipo_item === 1);
+  // Filtrar apenas itens do tipo '1' (comidas)
+  const comidas = dados.filter((item) => item.tipo_item === 2);
+ 
+  //const todos_itens = dados;
+
+  
   return (
     <View style={styles.container}>
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={{ uri: item.imagem }} style={styles.image} />
-            <Text style={styles.itemName}>{item.nome}</Text>
-            <Text style={styles.itemPrice}>R$ {item.preco.toFixed(2)}</Text>
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>Adicionar à Comanda</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <h1>Menu</h1>
+  
+        <h2>Comidas</h2>
+        <FlatList
+          data={comidas}
+          keyExtractor={(item) => item.id_item_cardapio.toString()}
+          numColumns={2}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.itemName}>{item.nome_item}</Text>
+              <Text style={styles.itemDescription}>{item.descricao_item}</Text>
+              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
+              <TouchableOpacity style={styles.addButton}>
+                <Text style={styles.addButtonText}>Adicionar à Comanda</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+  
+        <h2>Bebidas</h2>
+        <FlatList
+          data={bebidas}
+          keyExtractor={(item) => item.id_item_cardapio.toString()}
+          numColumns={2}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.itemName}>{item.nome_item}</Text>
+              <Text style={styles.itemDescription}>{item.descricao_item}</Text>
+              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
+              <TouchableOpacity style={styles.addButton}>
+                <Text style={styles.addButtonText}>Adicionar à Comanda</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </ScrollView>
+  
+
       <View style={styles.footer}>
         <TouchableOpacity style={styles.button} onPress={() => router.push("/comanda")}>
           <Text style={styles.buttonText}>Comandas</Text>
@@ -45,6 +83,7 @@ export default function Home() {
       </View>
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -59,29 +98,29 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 8,
     padding: 10,
-    alignItems: "center",
+    alignItems: "flex-start",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
-    maxWidth: "30%",
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 10,
+    maxWidth: "45%",
   },
   itemName: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
-    textAlign: "center",
+    color: "#333",
+  },
+  itemDescription: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 10,
   },
   itemPrice: {
     fontSize: 14,
-    color: "#555",
+    fontWeight: "bold",
+    color: "#007bff",
     marginBottom: 10,
   },
   addButton: {
@@ -89,6 +128,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
+    alignSelf: "stretch",
   },
   addButtonText: {
     color: "#fff",
