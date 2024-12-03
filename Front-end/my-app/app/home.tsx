@@ -1,50 +1,89 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  TextInput,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
-
 
 interface ItemCardapio {
   id_item_cardapio: number;
   descricao_item: string;
   nome_item: string;
   tipo_item: number;
-  preco: string; // Pode ser string ou number, dependendo de como seu backend retorna o preço
-}
-
-interface ItemCardapioCardapio { //####### Deve validar na tabela ItemCardapioCardapio o id_item_cardapio_card para repassar á proxima pagina (/itemcomanda) #######
-  id_item_cardapio_card: number;
-  id_cardapio: number;
-  id_item_cardapio: number;
+  preco: string;
 }
 
 export default function Home() {
-  const [dados, setDados] = useState<ItemCardapio[]>([]); // Estado tipado
+  const [dados, setDados] = useState<ItemCardapio[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [descricao_item, setDescricaoItem] = useState("");
+  const [nome_item, setNomeItem] = useState("");
+  const [tipo_item, setTipoItem] = useState("");
+  const [preco, setPreco] = useState("");
+
   const router = useRouter();
 
   const listar = async () => {
     try {
       const { data } = await axios.get("http://localhost:5000/itemcardapio");
-      setDados(data); // Atualiza o estado com os dados da API
-      console.log(data);
+      setDados(data);
     } catch (error) {
       console.error("Erro ao buscar os dados: ", error);
     }
   };
 
+  const adicionarItem = async () => {
+    if (!descricao_item || !nome_item || !tipo_item || !preco) {
+      Alert.alert("Erro", "Todos os campos são obrigatórios.");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5000/itemcardapio", {
+        descricao_item,
+        nome_item,
+        tipo_item: parseInt(tipo_item),
+        preco: parseFloat(preco),
+      });
+
+      Alert.alert("Sucesso", "Item adicionado com sucesso!");
+      setModalVisible(false);
+      listar(); // Atualiza a lista
+      limparFormulario();
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao salvar o item.");
+      console.error(error);
+    }
+  };
+
+  const limparFormulario = () => {
+    setDescricaoItem("");
+    setNomeItem("");
+    setTipoItem("");
+    setPreco("");
+  };
+
+  const adicionarComanda = (item: ItemCardapio) => {
+    router.push({
+      pathname: "/itemcomanda",
+      params: { id_item_cardapio: item.id_item_cardapio },
+    });
+  };
+
   useEffect(() => {
-    listar(); // Chama o método ao carregar a tela
+    listar();
   }, []);
 
   const bebidas = dados.filter((item) => item.tipo_item === 1);
   const comidas = dados.filter((item) => item.tipo_item === 2);
-
-  const adicionarComanda = (item: ItemCardapio) => { //####### Deve validar na tabela ItemCardapioCardapio o id_item_cardapio_card para repassar á proxima pagina (/itemcomanda) #######
-    router.push({
-      pathname: "/itemcomanda",
-      params: { id_item_cardapio: item.id_item_cardapio }, //####### Alterar ####### Conforme orientado acima
-    });
-  };
 
   return (
     <View style={styles.container}>
@@ -60,7 +99,9 @@ export default function Home() {
             <View style={styles.card}>
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
-              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
+              <Text style={styles.itemPrice}>
+                R$ {parseFloat(item.preco).toFixed(2)}
+              </Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => adicionarComanda(item)}
@@ -80,7 +121,9 @@ export default function Home() {
             <View style={styles.card}>
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
-              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
+              <Text style={styles.itemPrice}>
+                R$ {parseFloat(item.preco).toFixed(2)}
+              </Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => adicionarComanda(item)}
@@ -92,17 +135,64 @@ export default function Home() {
         />
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/comanda")}>
-          <Text style={styles.buttonText}>Comandas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/cozinha")}>
-          <Text style={styles.buttonText}>Cozinha</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/copa")}>
-          <Text style={styles.buttonText}>Copa</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Botão para abrir o modal */}
+      <TouchableOpacity
+        style={[styles.button, { marginBottom: 20 }]}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.buttonText}>Adicionar Item ao Cardápio</Text>
+      </TouchableOpacity>
+
+      {/* Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>Adicionar Item ao Cardápio</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Descrição do Item"
+              value={descricao_item}
+              onChangeText={setDescricaoItem}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do Item"
+              value={nome_item}
+              onChangeText={setNomeItem}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tipo do Item (1 para Bebidas, 2 para Comidas)"
+              value={tipo_item}
+              onChangeText={setTipoItem}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Preço"
+              value={preco}
+              onChangeText={setPreco}
+              keyboardType="numeric"
+            />
+
+            <TouchableOpacity style={styles.button} onPress={adicionarItem}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -114,7 +204,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   scrollViewContent: {
-    paddingBottom: 20, // Ajuste conforme necessário
+    paddingBottom: 20,
   },
   card: {
     flex: 1,
@@ -149,21 +239,14 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: "#007bff",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 5,
-    alignSelf: "stretch",
   },
   addButtonText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     textAlign: "center",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    marginTop: 10,
   },
   button: {
     backgroundColor: "#007bff",
@@ -174,5 +257,27 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     textAlign: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    marginBottom: 15,
+    paddingVertical: 5,
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: "#ff4d4d",
   },
 });
