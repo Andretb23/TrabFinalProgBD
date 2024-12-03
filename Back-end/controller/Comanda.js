@@ -17,27 +17,26 @@ async function selecionar_comanda(req, res){
     .catch(erro => { res.status(500).json(erro) });
 };
 
-async function cadastrar_comanda(req, res){
+async function cadastrar_comanda(req, res) {
+    try {
+        const hoje = moment().format("YYYY-MM-DD HH:mm:ss");
 
-    let hoje = moment().format("YYYY-MM-DD HH:mm:ss");
+        if (!req.body.nome_cliente) {
+            return res.status(400).send("O campo 'nome_cliente' é obrigatório.");
+        }
 
-    if (!req.body.nome_cliente)
-        res.status(500).send("Parametro nome_cliente é obrigatório.");
-    //else if (!req.body.data_fechamento)
-    //    res.status(500).send("Parâmetro data_fechamento é obrigatório.");
-    else if (!req.body.status)
-        res.status(500).send("Parâmetro status é obrigatório.");
-    else
-        await comanda
-        .create({ 
+        const novaComanda = await comanda.create({
             nome_cliente: req.body.nome_cliente,
             data_abertura: hoje,
-            data_fechamento: req.body.data_fechamento,
-            status: req.body.status
-        })
-        .then(resultado => { res.status(200).json(resultado)} )
-        .catch(erro => { res.status(500).json(erro) });
-};
+            status: true, // Garantindo o status padrão como aberta
+        });
+
+        return res.status(201).json(novaComanda);
+    } catch (error) {
+        console.error("Erro ao cadastrar comanda:", error);
+        return res.status(500).json({ error: "Erro ao cadastrar comanda", details: error.message });
+    }
+}
 
 
 async function alterar_comanda(req, res){
@@ -93,6 +92,27 @@ async function listarItensComanda(req, res) {
     }
   }
   
+  const criarComanda = async () => {
+    if (!novoNomeCliente.trim()) {
+      alert("O nome do cliente é obrigatório!");
+      return;
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:5000/comanda", {
+        nome_cliente: novoNomeCliente, // Envia apenas o nome do cliente
+      });
+  
+      alert("Comanda criada com sucesso!");
+      setNovaComandaModalVisible(false); // Fecha o modal
+      setNovoNomeCliente(""); // Limpa o campo
+      carregarComandas(); // Atualiza a lista de comandas
+    } catch (error) {
+      console.error("Erro ao criar nova comanda:", error);
+      alert("Erro ao criar nova comanda. Verifique o console para mais detalhes.");
+    }
+  };
+  
+  
 
-
-export default { listar_comanda, selecionar_comanda, cadastrar_comanda, alterar_comanda, deletar_comanda, listarItensComanda };
+export default { listar_comanda, selecionar_comanda, cadastrar_comanda, alterar_comanda, deletar_comanda, listarItensComanda, criarComanda };

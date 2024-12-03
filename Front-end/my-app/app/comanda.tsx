@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Button,
+  TextInput,
 } from "react-native";
 import axios from "axios";
 
@@ -25,32 +26,33 @@ interface Comanda {
 }
 
 export default function Comanda() {
-  const [comandas, setComandas] = useState<Comanda[]>([]); // Tipagem de comandas
-  const [itensComanda, setItensComanda] = useState<ItemComanda[]>([]); // Tipagem dos itens da comanda
-  const [modalVisible, setModalVisible] = useState(false); // Controle do modal
-  const [nomeCliente, setNomeCliente] = useState(""); // Nome do cliente para exibir no modal
+  const [comandas, setComandas] = useState<Comanda[]>([]);
+  const [itensComanda, setItensComanda] = useState<ItemComanda[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [nomeCliente, setNomeCliente] = useState("");
+  const [novaComandaModalVisible, setNovaComandaModalVisible] = useState(false);
+  const [novoNomeCliente, setNovoNomeCliente] = useState("");
 
   // Carregar comandas da API
   const carregarComandas = async () => {
     try {
       const response = await axios.get<Comanda[]>(
         "http://localhost:5000/comanda"
-      ); // Tipagem da resposta da API
+      );
       setComandas(response.data);
     } catch (error) {
       console.error("Erro ao carregar comandas:", error);
     }
   };
 
-  // Carregar itens da comanda
   const carregarItensComanda = async (idComanda: number, nomeCliente: string) => {
     try {
       const response = await axios.get<ItemComanda[]>(
         `http://localhost:5000/comanda/${idComanda}/itens`
-      ); // Tipagem da resposta
+      );
       setItensComanda(response.data);
-      setNomeCliente(nomeCliente); // Define o nome do cliente para exibir no modal
-      setModalVisible(true); // Exibe o modal
+      setNomeCliente(nomeCliente);
+      setModalVisible(true);
     } catch (error) {
       console.error("Erro ao carregar itens da comanda:", error);
     }
@@ -58,17 +60,35 @@ export default function Comanda() {
 
   const fecharComanda = async (idComanda: number) => {
     try {
-      // Enviar uma requisição PUT para alterar o status e a data de fechamento
-      const dataFechamento = new Date().toISOString(); // Data de fechamento no formato ISO
+      const dataFechamento = new Date().toISOString();
       await axios.put(`http://localhost:5000/comanda/${idComanda}`, {
-        status: false, // Alterar o status para "fechada"
-        data_fechamento: dataFechamento, // Enviar a data de fechamento
+        status: false,
+        data_fechamento: dataFechamento,
       });
-  
-      // Recarregar a lista de comandas para refletir a mudança
       carregarComandas();
     } catch (error) {
       console.error("Erro ao fechar comanda:", error);
+    }
+  };
+
+  // Função para criar uma nova comanda
+  const criarComanda = async () => {
+    if (!novoNomeCliente.trim()) {
+      alert("O nome do cliente é obrigatório!");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5000/comanda", {
+        nome_cliente: novoNomeCliente,
+      });
+      alert("Comanda criada com sucesso!");
+      setNovaComandaModalVisible(false);
+      setNovoNomeCliente("");
+      carregarComandas(); // Atualiza a lista de comandas
+    } catch (error) {
+      console.error("Erro ao criar nova comanda:", error);
+      alert("Erro ao criar nova comanda. Verifique o console para mais detalhes.");
     }
   };
 
@@ -99,7 +119,6 @@ export default function Comanda() {
               >
                 <Text style={styles.buttonText}>Ver Itens</Text>
               </TouchableOpacity>
-              {/* Verificar se a comanda está aberta antes de mostrar o botão "Fechar Comanda" */}
               {item.status && (
                 <TouchableOpacity
                   style={styles.button}
@@ -112,8 +131,45 @@ export default function Comanda() {
           </View>
         )}
       />
-  
-      {/* Modal para exibir os itens da comanda */}
+
+      {/* Botão "Adicionar Comanda" */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setNovaComandaModalVisible(true)}
+      >
+        <Text style={styles.addButtonText}>Adicionar Comanda</Text>
+      </TouchableOpacity>
+
+      {/* Modal para criar uma nova comanda */}
+      <Modal
+        visible={novaComandaModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setNovaComandaModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Nova Comanda</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do Cliente"
+              value={novoNomeCliente}
+              onChangeText={setNovoNomeCliente}
+            />
+            <Button
+              title="Salvar"
+              onPress={criarComanda}
+              color="#28a745"
+            />
+            <Button
+              title="Cancelar"
+              onPress={() => setNovaComandaModalVisible(false)}
+              color="#dc3545"
+            />
+          </View>
+        </View>
+      </Modal>
+
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -149,9 +205,8 @@ export default function Comanda() {
         </View>
       </Modal>
     </View>
-  );  
+  );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -231,5 +286,25 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 16,
     color: "#007bff",
+  },
+  addButton: {
+    backgroundColor: "#28a745",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
   },
 });
