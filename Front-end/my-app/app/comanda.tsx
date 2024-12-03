@@ -1,15 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+  Button,
+} from "react-native";
 import axios from "axios";
 
+// Tipagem para os itens da comanda
+interface ItemComanda {
+  id_item_comanda: number;
+  nome_item: string;
+  preco: string;
+}
+
+// Tipagem para as comandas
+interface Comanda {
+  id_comanda: number;
+  nome_cliente: string;
+  status: boolean;
+}
+
 export default function Comanda() {
-  const [comandas, setComandas] = useState([]);
-  const [itensComanda, setItensComanda] = useState([]);
-  
+  const [comandas, setComandas] = useState<Comanda[]>([]); // Tipagem de comandas
+  const [itensComanda, setItensComanda] = useState<ItemComanda[]>([]); // Tipagem dos itens da comanda
+  const [modalVisible, setModalVisible] = useState(false); // Controle do modal
+  const [nomeCliente, setNomeCliente] = useState(""); // Nome do cliente para exibir no modal
+
   // Carregar comandas da API
   const carregarComandas = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/comanda");
+      const response = await axios.get<Comanda[]>(
+        "http://localhost:5000/comanda"
+      ); // Tipagem da resposta da API
       setComandas(response.data);
     } catch (error) {
       console.error("Erro ao carregar comandas:", error);
@@ -17,17 +43,21 @@ export default function Comanda() {
   };
 
   // Carregar itens da comanda
-  const carregarItensComanda = async (idComanda) => {
+  const carregarItensComanda = async (idComanda: number, nomeCliente: string) => {
     try {
-      const response = await axios.get(`http://localhost:5000/comanda/${idComanda}/itens`);
+      const response = await axios.get<ItemComanda[]>(
+        `http://localhost:5000/comanda/${idComanda}/itens`
+      ); // Tipagem da resposta
       setItensComanda(response.data);
+      setNomeCliente(nomeCliente); // Define o nome do cliente para exibir no modal
+      setModalVisible(true); // Exibe o modal
     } catch (error) {
       console.error("Erro ao carregar itens da comanda:", error);
     }
   };
 
   // Fechar a comanda
-  const fecharComanda = async (idComanda) => {
+  const fecharComanda = async (idComanda: number) => {
     try {
       await axios.patch(`http://localhost:5000/comanda/${idComanda}/fechar`);
       carregarComandas(); // Recarregar a lista de comandas após fechamento
@@ -45,8 +75,10 @@ export default function Comanda() {
       <Text style={styles.title}>Comandas</Text>
       <FlatList
         data={comandas}
-        keyExtractor={(item) => item.id_comanda.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={(item) =>
+          item?.id_comanda ? item.id_comanda.toString() : Math.random().toString()
+        }
+        renderItem={({ item }: { item: Comanda }) => (
           <View style={styles.card}>
             <Text style={styles.itemName}>{item.nome_cliente}</Text>
             <Text style={styles.itemStatus}>
@@ -55,7 +87,9 @@ export default function Comanda() {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => carregarItensComanda(item.id_comanda)}
+                onPress={() =>
+                  carregarItensComanda(item.id_comanda, item.nome_cliente)
+                }
               >
                 <Text style={styles.buttonText}>Ver Itens</Text>
               </TouchableOpacity>
@@ -71,21 +105,42 @@ export default function Comanda() {
           </View>
         )}
       />
-      {itensComanda.length > 0 && (
-        <View style={styles.itensContainer}>
-          <Text style={styles.itensTitle}>Itens da Comanda:</Text>
-          <FlatList
-            data={itensComanda}
-            keyExtractor={(item) => item.id_item_comanda.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <Text style={styles.itemName}>{item.nome_item}</Text>
-                <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
-              </View>
-            )}
-          />
+
+      {/* Modal para exibir os itens da comanda */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Itens da Comanda</Text>
+            <Text style={styles.modalSubtitle}>Cliente: {nomeCliente}</Text>
+            <FlatList
+              data={itensComanda}
+              keyExtractor={(item) =>
+                item?.id_item_comanda
+                  ? item.id_item_comanda.toString()
+                  : Math.random().toString()
+              }
+              renderItem={({ item }: { item: ItemComanda }) => (
+                <View style={styles.itemCard}>
+                  <Text style={styles.itemName}>{item.nome_item}</Text>
+                  <Text style={styles.itemPrice}>
+                    R$ {parseFloat(item.preco).toFixed(2)}
+                  </Text>
+                </View>
+              )}
+            />
+            <Button
+              title="Fechar"
+              onPress={() => setModalVisible(false)}
+              color="#007bff"
+            />
+          </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
@@ -137,18 +192,37 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
   },
-  itensContainer: {
-    marginTop: 20,
-    padding: 10,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  itensTitle: {
-    fontSize: 22,
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
   },
+  modalSubtitle: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  itemCard: {
+    width: "100%",
+    backgroundColor: "#f8f8f8",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+  },
   itemPrice: {
     fontSize: 16,
-    marginTop: 5,
     color: "#007bff",
   },
 });

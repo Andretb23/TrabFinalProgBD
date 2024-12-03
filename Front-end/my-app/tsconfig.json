@@ -1,7 +1,10 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
+    "jsx": "react-native",  // Ou "react", dependendo do seu projeto
+    "strict": true,         // (opcional, mas recomendado)
+    "moduleResolution": "node",  // (recomendado)
+    "esModuleInterop": true, // (recomendado para importações de módulos)
     "paths": {
       "@/*": [
         "./*"
@@ -12,6 +15,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "src/**/*"  // Ou o caminho onde seus arquivos .tsx estão localizados
   ]
 }
