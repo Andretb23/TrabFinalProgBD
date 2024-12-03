@@ -3,13 +3,19 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from "
 import { useRouter } from "expo-router";
 import axios from "axios";
 
-// Definindo o tipo para o item do cardápio
+
 interface ItemCardapio {
   id_item_cardapio: number;
   descricao_item: string;
   nome_item: string;
   tipo_item: number;
   preco: string; // Pode ser string ou number, dependendo de como seu backend retorna o preço
+}
+
+interface ItemCardapioCardapio { //####### Deve validar na tabela ItemCardapioCardapio o id_item_cardapio_card para repassar á proxima pagina (/itemcomanda) #######
+  id_item_cardapio_card: number;
+  id_cardapio: number;
+  id_item_cardapio: number;
 }
 
 export default function Home() {
@@ -33,12 +39,11 @@ export default function Home() {
   const bebidas = dados.filter((item) => item.tipo_item === 1);
   const comidas = dados.filter((item) => item.tipo_item === 2);
 
-  const adicionarComanda = (item: ItemCardapio) => {
-    if (item.tipo_item === 1) {
-      router.push("/copa");
-    } else if (item.tipo_item === 2) {
-      router.push("/cozinha");
-    }
+  const adicionarComanda = (item: ItemCardapio) => { //####### Deve validar na tabela ItemCardapioCardapio o id_item_cardapio_card para repassar á proxima pagina (/itemcomanda) #######
+    router.push({
+      pathname: "/itemcomanda",
+      params: { id_item_cardapio: item.id_item_cardapio }, //####### Alterar ####### Conforme orientado acima
+    });
   };
 
   return (
