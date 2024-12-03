@@ -56,11 +56,17 @@ export default function Comanda() {
     }
   };
 
-  // Fechar a comanda
   const fecharComanda = async (idComanda: number) => {
     try {
-      await axios.patch(`http://localhost:5000/comanda/${idComanda}/fechar`);
-      carregarComandas(); // Recarregar a lista de comandas após fechamento
+      // Enviar uma requisição PUT para alterar o status e a data de fechamento
+      const dataFechamento = new Date().toISOString(); // Data de fechamento no formato ISO
+      await axios.put(`http://localhost:5000/comanda/${idComanda}`, {
+        status: false, // Alterar o status para "fechada"
+        data_fechamento: dataFechamento, // Enviar a data de fechamento
+      });
+  
+      // Recarregar a lista de comandas para refletir a mudança
+      carregarComandas();
     } catch (error) {
       console.error("Erro ao fechar comanda:", error);
     }
@@ -93,6 +99,7 @@ export default function Comanda() {
               >
                 <Text style={styles.buttonText}>Ver Itens</Text>
               </TouchableOpacity>
+              {/* Verificar se a comanda está aberta antes de mostrar o botão "Fechar Comanda" */}
               {item.status && (
                 <TouchableOpacity
                   style={styles.button}
@@ -105,7 +112,7 @@ export default function Comanda() {
           </View>
         )}
       />
-
+  
       {/* Modal para exibir os itens da comanda */}
       <Modal
         visible={modalVisible}
@@ -142,7 +149,7 @@ export default function Comanda() {
         </View>
       </Modal>
     </View>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({

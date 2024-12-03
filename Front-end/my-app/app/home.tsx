@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity , ScrollView} from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
 
+// Definindo o tipo para o item do cardápio
+interface ItemCardapio {
+  id_item_cardapio: number;
+  descricao_item: string;
+  nome_item: string;
+  tipo_item: number;
+  preco: string; // Pode ser string ou number, dependendo de como seu backend retorna o preço
+}
+
 export default function Home() {
-  const [dados, setDados] = useState([]); // Estado movido para dentro do componente
+  const [dados, setDados] = useState<ItemCardapio[]>([]); // Estado tipado
   const router = useRouter();
 
   const listar = async () => {
@@ -21,19 +30,22 @@ export default function Home() {
     listar(); // Chama o método ao carregar a tela
   }, []);
 
-  // Filtrar apenas itens do tipo '1' (bebidas)
   const bebidas = dados.filter((item) => item.tipo_item === 1);
-  // Filtrar apenas itens do tipo '1' (comidas)
   const comidas = dados.filter((item) => item.tipo_item === 2);
- 
-  //const todos_itens = dados;
 
-  
+  const adicionarComanda = (item: ItemCardapio) => {
+    if (item.tipo_item === 1) {
+      router.push("/copa");
+    } else if (item.tipo_item === 2) {
+      router.push("/cozinha");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <h1>Menu</h1>
-  
+
         <h2>Comidas</h2>
         <FlatList
           data={comidas}
@@ -44,13 +56,16 @@ export default function Home() {
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
               <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
-              <TouchableOpacity style={styles.addButton}>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => adicionarComanda(item)}
+              >
                 <Text style={styles.addButtonText}>Adicionar à Comanda</Text>
               </TouchableOpacity>
             </View>
           )}
         />
-  
+
         <h2>Bebidas</h2>
         <FlatList
           data={bebidas}
@@ -61,14 +76,16 @@ export default function Home() {
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
               <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
-              <TouchableOpacity style={styles.addButton}>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => adicionarComanda(item)}
+              >
                 <Text style={styles.addButtonText}>Adicionar à Comanda</Text>
               </TouchableOpacity>
             </View>
           )}
         />
       </ScrollView>
-  
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.button} onPress={() => router.push("/comanda")}>
@@ -83,7 +100,6 @@ export default function Home() {
       </View>
     </View>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -91,6 +107,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f8f8",
     padding: 10,
+  },
+  scrollViewContent: {
+    paddingBottom: 20, // Ajuste conforme necessário
   },
   card: {
     flex: 1,

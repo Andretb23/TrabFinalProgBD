@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, Alert, StyleSheet } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { Picker } from "@react-native-picker/picker";  
 import { useRouter } from "expo-router";
 import axios from "axios";
+import Icon from "react-native-vector-icons/FontAwesome"; 
+import Toast from "react-native-toast-message"; // Importe corretamente
 
 // Interface para tipar os usuários
 interface Usuario {
@@ -19,13 +21,19 @@ export default function Login() {
   const [selectedUserType, setSelectedUserType] = useState("1");
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
   const [nome, setNome] = useState("");
   const router = useRouter();
 
   // Função para autenticar o usuário
   const handleLogin = async () => {
     if (!login || !senha) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Erro',
+        text2: 'Preencha todos os campos.',
+      });
       return;
     }
 
@@ -38,13 +46,28 @@ export default function Login() {
       );
 
       if (usuarioEncontrado) {
-        Alert.alert("Sucesso", "Login realizado com sucesso!");
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Sucesso',
+          text2: 'Login realizado com sucesso!',
+        });
         router.push("/home");
       } else {
-        Alert.alert("Erro", "Usuário ou senha inválidos.");
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Erro',
+          text2: 'Usuário ou senha inválidos.',
+        });
       }
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível conectar ao servidor.");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Erro',
+        text2: 'Não foi possível conectar ao servidor.',
+      });
       console.error(error);
     }
   };
@@ -52,7 +75,12 @@ export default function Login() {
   // Função para cadastrar um novo usuário
   const handleCadastro = async () => {
     if (!nome || !login || !senha) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Erro',
+        text2: 'Preencha todos os campos.',
+      });
       return;
     }
 
@@ -65,15 +93,32 @@ export default function Login() {
         ativo: true,
       });
 
-      if (response.status === 201) {
-        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+      if (response.status === 200 || response.status === 201) {
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Sucesso',
+          text2: 'Cadastro efetuado com sucesso!',
+        });
         setModalVisible(false);
         setNome("");
         setLogin("");
         setSenha("");
+      } else {
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Erro',
+          text2: 'Não foi possível cadastrar o usuário.',
+        });
       }
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível realizar o cadastro.");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Erro',
+        text2: 'Erro ao conectar ao servidor.',
+      });
       console.error(error);
     }
   };
@@ -89,14 +134,26 @@ export default function Login() {
           value={login}
           onChangeText={setLogin}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={senha}
-          onChangeText={setSenha}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor="#999"
+            secureTextEntry={!senhaVisivel} 
+            value={senha}
+            onChangeText={setSenha}
+          />
+          <TouchableOpacity
+            onPress={() => setSenhaVisivel(!senhaVisivel)}
+            style={styles.showPasswordButton}
+          >
+            <Icon
+              name={senhaVisivel ? "eye" : "eye-slash"}
+              size={20}
+              color="#007bff"
+            />
+          </TouchableOpacity>
+        </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
@@ -167,11 +224,14 @@ export default function Login() {
           </View>
         </View>
       </Modal>
+
+      {/* Coloque o Toast aqui */}
+      <Toast />
     </View>
   );
 }
 
-// Estilização permanece igual ao original
+// Estilização (sem alterações)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -207,18 +267,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 10,
-  },
-  picker: {
+  passwordContainer: {
+    position: "relative",
     width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginBottom: 15,
+  },
+  showPasswordButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -240,6 +296,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -248,20 +309,22 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    maxWidth: 400,
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginBottom: 20,
     textAlign: "center",
+  },
+  picker: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    fontSize: 16,
   },
 });

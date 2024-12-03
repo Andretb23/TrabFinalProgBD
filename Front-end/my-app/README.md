@@ -65,3 +65,12 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+Baixar a extenção para ícones do react native:
+npm install react-native-vector-icons
+npm install @types/react-native-vector-icons --save-dev
+
+Baixar o toast para notificação de sucesso no login e cadastro
+npm install react-native-toast-message
+
+
