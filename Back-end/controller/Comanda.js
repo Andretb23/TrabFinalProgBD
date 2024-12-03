@@ -1,5 +1,7 @@
-import comanda from "../model/ComandaModel.js"
+import { QueryTypes } from "sequelize";
+import comanda from "../model/ComandaModel.js";
 import moment from 'moment';
+import banco from "../banco.js";
 
 async function listar_comanda(req, res){
     await comanda
@@ -65,5 +67,30 @@ async function deletar_comanda(req, res){
     .catch(erro => { res.status(500).json(erro) });
 };
 
+async function listarItensComanda(req, res) {
+    try {
+      const { id_comanda } = req.params;
+  
+      const itens = await banco.query(
+        `SELECT ic2.nome_item 
+         FROM comanda c
+         JOIN item_comanda ic ON c.id_comanda = ic.id_comanda
+         JOIN item_cardapio_cardapio icc ON ic.item_comanda_cardapio = icc.id_item_cardapio_card
+         JOIN item_cardapio ic2 ON icc.id_item_cardapio = ic2.id_item_cardapio
+         WHERE c.id_comanda = :id_comanda`,
+        {
+          replacements: { id_comanda },
+          type: QueryTypes.SELECT,
+        }
+      );
+  
+      res.status(200).json(itens);
+    } catch (error) {
+      console.error("Erro ao listar itens da comanda:", error); // Exibe o erro completo no console
+      res.status(500).json({ error: "Erro ao listar itens da comanda", details: error.message });
+    }
+  }
+  
 
-export default { listar_comanda, selecionar_comanda, cadastrar_comanda, alterar_comanda, deletar_comanda };
+
+export default { listar_comanda, selecionar_comanda, cadastrar_comanda, alterar_comanda, deletar_comanda, listarItensComanda };

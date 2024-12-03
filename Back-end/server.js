@@ -50,6 +50,7 @@ app.delete("/itemcardapio/:id_item_cardapio", itemCardapio.deletar_itemCardapio)
 
 
 app.get("/comanda", comanda.listar_comanda);
+app.get("/comanda/:id_comanda/itens", comanda.listarItensComanda);
 app.get("/comanda/:id_comanda", comanda.selecionar_comanda);
 app.post("/comanda/", comanda.cadastrar_comanda);
 app.put("/comanda/:id_comanda", comanda.alterar_comanda);
