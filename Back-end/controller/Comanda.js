@@ -72,7 +72,9 @@ async function listarItensComanda(req, res) {
       const { id_comanda } = req.params;
   
       const itens = await banco.query(
-        `SELECT ic2.nome_item 
+        `SELECT 
+        ic2.nome_item,
+        ic2.preco
          FROM comanda c
          JOIN item_comanda ic ON c.id_comanda = ic.id_comanda
          JOIN item_cardapio_cardapio icc ON ic.item_comanda_cardapio = icc.id_item_cardapio_card

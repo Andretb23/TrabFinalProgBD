@@ -77,6 +77,13 @@ app.get("/ordemProducao/:id_ordem_producao", ordemProducao.selecionar_ordemProdu
 app.post("/ordemProducao/", ordemProducao.cadastrar_ordemProducao);
 app.put("/ordemProducao/:id_ordem_producao", ordemProducao.alterar_ordemProducao);
 app.delete("/ordemProducao/:id_ordem_producao", ordemProducao.deletar_ordemProducao);
+// Rota para listar itens para a Cozinha (tipo_item = 2)
+app.get("/ordemProducao/cozinha/:tipo_item", ordemProducao.listar_ordemProducao_cozinha);
+
+// Rota para listar itens para a Copa (tipo_item = 1)
+app.get("/ordemProducao/copa/:tipo_item", ordemProducao.listar_ordemProducao_copa);
+
+
 
 
 app.listen(5000);
