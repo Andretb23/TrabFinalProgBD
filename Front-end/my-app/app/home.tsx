@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  TextInput,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
 
@@ -99,9 +89,7 @@ export default function Home() {
             <View style={styles.card}>
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
-              <Text style={styles.itemPrice}>
-                R$ {parseFloat(item.preco).toFixed(2)}
-              </Text>
+              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => adicionarComanda(item)}
@@ -121,9 +109,7 @@ export default function Home() {
             <View style={styles.card}>
               <Text style={styles.itemName}>{item.nome_item}</Text>
               <Text style={styles.itemDescription}>{item.descricao_item}</Text>
-              <Text style={styles.itemPrice}>
-                R$ {parseFloat(item.preco).toFixed(2)}
-              </Text>
+              <Text style={styles.itemPrice}>R$ {parseFloat(item.preco).toFixed(2)}</Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => adicionarComanda(item)}
@@ -134,6 +120,18 @@ export default function Home() {
           )}
         />
       </ScrollView>
+
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/comanda")}>
+          <Text style={styles.buttonText}>Comandas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/cozinha")}>
+          <Text style={styles.buttonText}>Cozinha</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/copa")}>
+          <Text style={styles.buttonText}>Copa</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Botão para abrir o modal */}
       <TouchableOpacity
@@ -239,14 +237,21 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: "#007bff",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 5,
+    alignSelf: "stretch",
   },
   addButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: 10,
   },
   button: {
     backgroundColor: "#007bff",
