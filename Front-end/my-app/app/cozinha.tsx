@@ -1,69 +1,160 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
-import axios from 'axios'; // Ou qualquer outro método para fazer requisições HTTP
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 
 const CozinhaScreen = () => {
-  // Estado para armazenar os dados da API
   const [responseData, setResponseData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Estado para controle de carregamento
-  const [error, setError] = useState<string | null>(null); // Estado para controle de erros
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Função para buscar os dados da API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/ordemProducao/cozinha');
-        setResponseData(response.data); // Armazena os dados recebidos no estado
+        const response = await axios.get('http://localhost:5000/ordemProducao/cozinha/2'); // Supondo tipo_item=2 para cozinha
+        setResponseData(response.data);
       } catch (err) {
         setError('Erro ao carregar dados da cozinha');
         console.error(err);
       } finally {
-        setLoading(false); // Finaliza o carregamento
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []); // O array vazio [] garante que a requisição aconteça apenas uma vez
+  }, []);
 
-  // Função de keyExtractor para o FlatList
-  const keyExtractor = (item: any) => item.id_ordem_producao.toString(); // Asegure-se de que a chave é única
+  const handleFinalizar = async (id: number) => {
+    try {
+      await axios.put(`http://localhost:5000/ordemProducao/finalizar/${id}`);
+      setResponseData(prevData =>
+        prevData.map(item =>
+          item.id_ordem_producao === id ? { ...item, status_producao: 2 } : item
+        )
+      );
+    } catch (err) {
+      setError('Erro ao finalizar a ordem');
+      console.error(err);
+    }
+  };
 
-  // Renderiza os itens no FlatList
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-      <Text>Nome do Item: {item.nome_item}</Text>
-      <Text>Status da Produção: {item.status_producao}</Text>
-      <Text>Data do Pedido: {item.data_pedido}</Text>
-    </View>
-  );
+  const renderItem = ({ item }: { item: any }) => {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Nome do Item: {item.nome_item}</Text>
+        <Text style={styles.cardStatus}>
+          Status da Produção: {item.status_producao === 1 ? 'Em Preparo' : 'Finalizado'}
+        </Text>
+        {item.status_producao !== 2 && (
+          <TouchableOpacity style={styles.finalizeButton} onPress={() => handleFinalizar(item.id_ordem_producao)}>
+            <Text style={styles.finalizeButtonText}>Finalizar</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   if (loading) {
-    // Exibe um indicador de carregamento enquanto os dados estão sendo buscados
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFA500" />
       </View>
     );
   }
 
   if (error) {
-    // Exibe uma mensagem de erro, caso ocorra
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.errorContainer}>
         <Text>{error}</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <FlatList
-        data={responseData} // Passa os dados para o FlatList
-        keyExtractor={keyExtractor} // Define a chave única para cada item
-        renderItem={renderItem} // Renderiza os itens da lista
-      />
+    <View style={styles.container}>
+      <Text style={styles.title}>Área da Cozinha</Text>
+      {responseData.length === 0 ? (
+        <Text style={styles.noItems}>Nenhum item disponível no momento.</Text>
+      ) : (
+        <FlatList
+          data={responseData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id_ordem_producao.toString()}
+          numColumns={2} // Exibe 2 cards por linha
+          columnWrapperStyle={styles.columnWrapper} // Estilo para o alinhamento dos cards
+        />
+      )}
     </View>
   );
 };
 
 export default CozinhaScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f8f8",
+    padding: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#FFA500", // Laranja
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 12,
+    marginBottom: 15,
+    marginHorizontal: 5, // Espaçamento entre os cards
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    flex: 1, // Faz o card ocupar o espaço disponível de forma proporcional
+    maxWidth: "48%", // Garantir que o card ocupe até 48% da largura disponível
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  cardStatus: {
+    fontSize: 14,
+    color: "#555",
+    marginVertical: 5,
+  },
+  finalizeButton: {
+    backgroundColor: "#FFA500", // Laranja
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+    marginTop: 10,
+    alignSelf: "flex-start",
+  },
+  finalizeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  noItems: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  columnWrapper: {
+    justifyContent: 'space-between', // Espaçamento entre os cards na linha
+  },
+});

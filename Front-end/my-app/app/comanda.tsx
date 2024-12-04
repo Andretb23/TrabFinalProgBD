@@ -104,6 +104,7 @@ export default function Comanda() {
         keyExtractor={(item) =>
           item?.id_comanda ? item.id_comanda.toString() : Math.random().toString()
         }
+        numColumns={2} // Adicionado para ter dois cards por linha
         renderItem={({ item }: { item: Comanda }) => (
           <View style={styles.card}>
             <Text style={styles.itemName}>{item.nome_cliente}</Text>
@@ -159,7 +160,7 @@ export default function Comanda() {
             <Button
               title="Salvar"
               onPress={criarComanda}
-              color="#28a745"
+              color="#FFA500" // Laranja
             />
             <Button
               title="Cancelar"
@@ -199,7 +200,7 @@ export default function Comanda() {
             <Button
               title="Fechar"
               onPress={() => setModalVisible(false)}
-              color="#007bff"
+              color="#FFA500"
             />
           </View>
         </View>
@@ -207,6 +208,7 @@ export default function Comanda() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -229,6 +231,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
+    marginRight: 10, // Adicionado para dar espaçamento entre os cards
+    width: "48%", // Ajustado para dois cards por linha
   },
   itemName: {
     fontSize: 20,
@@ -243,7 +247,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#FFA500", // Laranja
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
@@ -285,10 +289,10 @@ const styles = StyleSheet.create({
   },
   itemPrice: {
     fontSize: 16,
-    color: "#007bff",
+    color: "#FFA500", // Laranja
   },
   addButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#FFA500", // Laranja
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
@@ -301,10 +305,11 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
     padding: 10,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
     marginBottom: 15,
   },
 });
+

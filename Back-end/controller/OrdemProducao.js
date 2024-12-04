@@ -67,7 +67,7 @@ async function listar_ordemProducao_cozinha(req, res) {
 
         // Consulta ao banco para buscar os pedidos da cozinha
         const resultado = await banco.query(`
-            SELECT ic2.nome_item, ic2.tipo_item
+            SELECT ic2.nome_item, ic2.tipo_item, op.status_producao, op.id_ordem_producao
             FROM ordem_producao op
             JOIN item_comanda ic ON op.id_item_comanda = ic.id_item_comanda
             JOIN item_cardapio_cardapio icc ON ic.item_comanda_cardapio = icc.id_item_cardapio_card
@@ -93,7 +93,7 @@ async function listar_ordemProducao_copa(req, res) {
 
         // Consulta ao banco para buscar os pedidos da copa
         const resultado = await banco.query(`
-            SELECT ic2.nome_item, ic2.tipo_item
+            SELECT ic2.nome_item, ic2.tipo_item, op.status_producao, op.id_ordem_producao
             FROM ordem_producao op
             JOIN item_comanda ic ON op.id_item_comanda = ic.id_item_comanda
             JOIN item_cardapio_cardapio icc ON ic.item_comanda_cardapio = icc.id_item_cardapio_card
@@ -112,6 +112,29 @@ async function listar_ordemProducao_copa(req, res) {
     }
 }
 
+// Função para alterar o status da ordem de produção (dado o id_ordem_producao) para "Finalizado" (status = 2)
+async function finalizar_ordemProducao(req, res) {
+    try {
+        const { id_ordem_producao } = req.params;  // Obtém o ID da ordem de produção da URL (dinâmico)
+        const status_producao = 2;  // Status para "Finalizado"
+
+        // Atualiza o status da ordem de produção para 2 (Finalizado), dado o ID da ordem
+        const resultado = await ordemProducao.update(
+            { status_producao: status_producao },
+            { where: { id_ordem_producao } }
+        );
+
+        if (resultado[0] === 0) {
+            // Se não houver ordens afetadas (erro no ID ou outro motivo)
+            return res.status(404).json({ error: "Ordem de produção não encontrada" });
+        }
+
+        res.status(200).json({ message: "Ordem de produção finalizada com sucesso!" });
+    } catch (erro) {
+        console.error("Erro ao finalizar ordem de produção:", erro);
+        res.status(500).json({ error: "Erro ao finalizar a ordem de produção" });
+    }
+}
 
 export default {
     listar_ordemProducao,
@@ -120,5 +143,6 @@ export default {
     alterar_ordemProducao,
     deletar_ordemProducao,
     listar_ordemProducao_cozinha,
-    listar_ordemProducao_copa
+    listar_ordemProducao_copa,
+    finalizar_ordemProducao
 };

@@ -1,119 +1,159 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
 import axios from "axios";
 
-// Definir a interface para os itens da copa
-interface ItemCopa {
-  id_ordem_producao: number;
-  nome_item: string;
-  tipo_item: number;
-  status_producao: number;
-}
-
-export default function Copa() {
-  const [itensCopa, setItensCopa] = useState<ItemCopa[]>([]);
+const CopaScreen = () => {
+  const [responseData, setResponseData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Requisição para a rota da copa
-    axios
-      .get("http://localhost:5000/ordemProducao/copa/1") // Rota de itens para a copa
-      .then((response) => {
-        setItensCopa(response.data);
-      })
-      .catch((error) => {
-        console.error("Erro ao obter itens da copa:", error);
-      });
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/ordemProducao/copa/1"); // Supondo tipo_item=1 para copa (bebida)
+        setResponseData(response.data);
+      } catch (err) {
+        setError("Erro ao carregar dados da copa");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const renderItem = ({ item }: { item: ItemCopa }) => (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.nome_item}</Text>
-      <Text style={styles.cardSubtitle}>
-        Tipo: {item.tipo_item === 1 ? "Copa" : "Desconhecido"}
-      </Text>
-      <Text style={styles.cardStatus}>
-        Status: {item.status_producao === 1 ? "Em preparo" : "Pronto"}
-      </Text>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Atualizar Status</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const keyExtractor = (item: any) => item.id_ordem_producao ? item.id_ordem_producao.toString() : "";
+
+  const handleFinalizar = async (id: number) => {
+    try {
+      // Alterando a URL para usar o endpoint correto de finalizar a ordem
+      await axios.put(`http://localhost:5000/ordemProducao/finalizar/${id}`);
+      setResponseData(prevData =>
+        prevData.map(item =>
+          item.id_ordem_producao === id ? { ...item, status_producao: 2 } : item
+        )
+      );
+    } catch (err) {
+      setError("Erro ao finalizar a ordem");
+      console.error(err);
+    }
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Nome do Item: {item.nome_item}</Text>
+        <Text style={styles.cardStatus}>
+          Status da Produção: {item.status_producao === 1 ? "Em Preparo" : "Finalizado"}
+        </Text>
+        {item.status_producao !== 2 && (
+          <TouchableOpacity style={styles.finalizeButton} onPress={() => handleFinalizar(item.id_ordem_producao)}>
+            <Text style={styles.finalizeButtonText}>Finalizar</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFA500" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Área da Copa</Text>
-      <Text style={styles.subtitle}>Gerencie os pedidos da copa aqui.</Text>
-      {itensCopa.length === 0 ? (
-        <Text style={styles.noItems}>Nenhum item disponível no momento.</Text>
-      ) : (
-        <FlatList
-          data={itensCopa}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id_ordem_producao.toString()}
-        />
-      )}
+      <FlatList
+        data={responseData}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        numColumns={2} // Exibe 2 cards por linha
+        columnWrapperStyle={styles.columnWrapper} // Estilo para o alinhamento dos cards
+      />
     </View>
   );
-}
+};
+
+export default CopaScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
-    padding: 20,
+    padding: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#555",
-    marginBottom: 30,
-    textAlign: "center",
+    color: "#FFA500", // Cor laranja
   },
   card: {
     backgroundColor: "#fff",
-    padding: 15,
+    padding: 12,
     marginBottom: 15,
-    borderRadius: 10,
+    marginHorizontal: 5, // Espaçamento entre os cards
+    borderRadius: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    flex: 1, // Faz o card ocupar o espaço disponível de forma proporcional
+    maxWidth: "48%", // Garantir que o card ocupe até 48% da largura disponível
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: "#777",
-    marginVertical: 5,
+    color: "#333",
   },
   cardStatus: {
     fontSize: 14,
-    color: "#333",
+    color: "#555",
     marginVertical: 5,
   },
-  button: {
-    backgroundColor: "#007bff",
-    padding: 10,
+  finalizeButton: {
+    backgroundColor: "#FFA500", // Cor laranja
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 5,
     marginTop: 10,
+    alignSelf: "flex-start",
   },
-  buttonText: {
+  finalizeButtonText: {
     color: "#fff",
-    textAlign: "center",
     fontWeight: "bold",
+    fontSize: 14,
   },
   noItems: {
     fontSize: 16,
     color: "#555",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  columnWrapper: {
+    justifyContent: 'space-between', // Espaçamento entre os cards na linha
   },
 });
