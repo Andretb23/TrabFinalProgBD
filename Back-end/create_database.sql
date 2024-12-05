@@ -72,3 +72,8 @@ CREATE TABLE ordem_producao (
     status_producao INT NOT NULL,
     FOREIGN KEY (id_item_comanda) REFERENCES item_comanda (id_item_comanda) 
 );
+
+
+--Alteração
+ALTER TABLE comanda
+ADD COLUMN total NUMERIC(10, 2);
