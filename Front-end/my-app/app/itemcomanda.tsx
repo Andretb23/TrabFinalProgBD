@@ -32,6 +32,23 @@ export default function ItemComanda() {
       }
     };
 
+ 
+    const enviarparaproducao = async (pk: number, status: number) => {
+      try {
+        // Enviar a requisição para o backend
+        const response = await axios.post("http://localhost:5000/ordemproducao", {
+          id_item_comanda: pk,  // Envia a PK do item de comanda
+          status_producao: status  // Envia o status de produção como 1
+        });
+    
+        console.log("Status de produção atualizado:", response.data);
+        alert("Status de produção atualizado com sucesso!");
+      } catch (error) {
+        console.error("Erro ao atualizar status de produção:", error);
+        alert("Erro ao atualizar status de produção. Tente novamente.");
+      }
+    };
+    
     const selecionarComanda = async (id: number) => {
       try {
         // Obter o ID do item cardápio da URL
@@ -48,8 +65,12 @@ export default function ItemComanda() {
           item_comanda_cardapio: idItemCardapio_url, // Envia o ID do item de cardápio
         });
     
-        console.log("Resposta do servidor:", response.data);
-        alert("Comanda selecionada com sucesso!");
+        //console.log("Resposta do servidor:", response.data); Apenas visualizar ao retorno
+        //alert("Comanda selecionada com sucesso!");
+
+
+        const pk = response.data.id_item_comanda;
+        enviarparaproducao(pk, 1);
 
         router.push("/home");
 
