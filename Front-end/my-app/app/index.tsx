@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Modal, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";  
 import { useRouter } from "expo-router";
 import axios from "axios";
 import Icon from "react-native-vector-icons/FontAwesome"; 
-import Toast from "react-native-toast-message"; // Importe corretamente
+import Toast from "react-native-toast-message"; 
 
-// Interface para tipar os usuários
 interface Usuario {
   id: number;
   nome: string;
@@ -23,9 +22,10 @@ export default function Login() {
   const [senha, setSenha] = useState("");
   const [senhaVisivel, setSenhaVisivel] = useState(false);
   const [nome, setNome] = useState("");
+  const [senhaCadastro, setSenhaCadastro] = useState("");  // Estado para a senha de cadastro
+  const [senhaVisivelCadastro, setSenhaVisivelCadastro] = useState(false); // Estado para visibilidade da senha de cadastro
   const router = useRouter();
 
-  // Função para autenticar o usuário
   const handleLogin = async () => {
     if (!login || !senha) {
       Toast.show({
@@ -72,9 +72,8 @@ export default function Login() {
     }
   };
 
-  // Função para cadastrar um novo usuário
   const handleCadastro = async () => {
-    if (!nome || !login || !senha) {
+    if (!nome || !login || !senhaCadastro) {  // Alterado para senhaCadastro
       Toast.show({
         type: 'error',
         position: 'bottom',
@@ -88,7 +87,7 @@ export default function Login() {
       const response = await axios.post("http://localhost:5000/usuario", {
         nome,
         login,
-        senha,
+        senha: senhaCadastro, // Alterado para senhaCadastro
         tipo_usuario: parseInt(selectedUserType, 10),
         ativo: true,
       });
@@ -103,7 +102,7 @@ export default function Login() {
         setModalVisible(false);
         setNome("");
         setLogin("");
-        setSenha("");
+        setSenhaCadastro("");  // Limpa o campo de senha após cadastro
       } else {
         Toast.show({
           type: 'error',
@@ -191,14 +190,26 @@ export default function Login() {
               value={login}
               onChangeText={setLogin}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Senha"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={senha}
-              onChangeText={setSenha}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Senha"
+                placeholderTextColor="#999"
+                secureTextEntry={!senhaVisivelCadastro}  // Usando senhaVisivelCadastro
+                value={senhaCadastro}  // Usando senhaCadastro
+                onChangeText={setSenhaCadastro}
+              />
+              <TouchableOpacity
+                onPress={() => setSenhaVisivelCadastro(!senhaVisivelCadastro)} // Alternando senhaVisivelCadastro
+                style={styles.showPasswordButton}
+              >
+                <Icon
+                  name={senhaVisivelCadastro ? "eye" : "eye-slash"}
+                  size={20}
+                  color="#007bff"
+                />
+              </TouchableOpacity>
+            </View>
             <Text style={styles.label}>Tipo de Usuário</Text>
             <Picker
               selectedValue={selectedUserType}
@@ -225,13 +236,11 @@ export default function Login() {
         </View>
       </Modal>
 
-      {/* Coloque o Toast aqui */}
       <Toast />
     </View>
   );
 }
 
-// Estilização (sem alterações)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -282,14 +291,18 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007bff",
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: "center",
     flex: 1,
-    marginHorizontal: 5,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonSecondary: {
     backgroundColor: "#6c757d",
+    borderWidth: 0,
+    elevation: 0,   
   },
   buttonText: {
     color: "#fff",
@@ -301,6 +314,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 10,
   },
+  picker: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -309,8 +328,9 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    backgroundColor: "#fff",
+    maxWidth: 400,
     padding: 20,
+    backgroundColor: "#fff",
     borderRadius: 10,
   },
   modalTitle: {
@@ -318,13 +338,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-  },
-  picker: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    fontSize: 16,
-  },
+  }
 });

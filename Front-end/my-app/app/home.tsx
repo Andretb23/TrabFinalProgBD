@@ -11,6 +11,12 @@ interface ItemCardapio {
   preco: string;
 }
 
+interface ItemCardapioCardapio {
+  id_item_cardapio_card: number;
+  id_cardapio: number;
+  id_irem_cardapio: number;
+}
+
 export default function Home() {
   const [dados, setDados] = useState<ItemCardapio[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -75,10 +81,10 @@ export default function Home() {
 
   // Função para adicionar item à comanda
   const adicionarComanda = (item: ItemCardapio) => {
-    router.push({
-      pathname: "/itemcomanda",
+      router.push({
+        pathname: "/itemcomanda",
       params: { id_item_cardapio: item.id_item_cardapio },
-    });
+      });
   };
 
   // UseEffect para carregar os dados do cardápio quando o componente é montado
@@ -157,13 +163,23 @@ export default function Home() {
         )}
       </ScrollView>
 
-      {/* Botão para abrir o modal */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
       <TouchableOpacity
-        style={[styles.button, { width: 600 }]} // Definindo um comprimento fixo para o botão
+        style={[styles.button, { width: "48%" }]} // Botão 1 com largura de 48%
         onPress={() => setModalVisible(true)}
       >
         <Text style={[styles.buttonText, { fontSize: 12 }]}>Adicionar Item ao Cardápio</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, { width: "48%" }]} // Botão 2 com largura de 48%
+        onPress={() => router.push({pathname: "/relatorio"})}
+      >
+        <Text style={[styles.buttonText, { fontSize: 12 }]}>Visualizar Relatório Diário</Text>
+      </TouchableOpacity>
+    </View>
+
+
 
       {/* Modal */}
       <Modal

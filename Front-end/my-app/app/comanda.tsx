@@ -23,6 +23,7 @@ interface Comanda {
   id_comanda: number;
   nome_cliente: string;
   status: boolean;
+  total: number;
 }
 
 export default function Comanda() {
@@ -32,24 +33,24 @@ export default function Comanda() {
   const [nomeCliente, setNomeCliente] = useState("");
   const [novaComandaModalVisible, setNovaComandaModalVisible] = useState(false);
   const [novoNomeCliente, setNovoNomeCliente] = useState("");
+  const [modalEncerramentoVisible, setModalEncerramentoVisible] = useState(false);
+  const [valorTotalComanda, setValorTotalComanda] = useState<number | null>(null);
+
 
   // Carregar comandas da API
   const carregarComandas = async () => {
     try {
-      const response = await axios.get<Comanda[]>(
-        "http://localhost:5000/comanda"
-      );
+      const response = await axios.get<Comanda[]>("http://localhost:5000/comanda");
       setComandas(response.data);
     } catch (error) {
       console.error("Erro ao carregar comandas:", error);
     }
   };
 
+  // Carregar itens da comanda
   const carregarItensComanda = async (idComanda: number, nomeCliente: string) => {
     try {
-      const response = await axios.get<ItemComanda[]>(
-        `http://localhost:5000/comanda/${idComanda}/itens`
-      );
+      const response = await axios.get<ItemComanda[]>(`http://localhost:5000/comanda/${idComanda}/itens`);
       setItensComanda(response.data);
       setNomeCliente(nomeCliente);
       setModalVisible(true);
@@ -58,18 +59,31 @@ export default function Comanda() {
     }
   };
 
-  const fecharComanda = async (idComanda: number) => {
+  // Função para encerrar a comanda
+  const encerrarComanda = async (idComanda: number) => {
     try {
-      const dataFechamento = new Date().toISOString();
-      await axios.put(`http://localhost:5000/comanda/${idComanda}`, {
-        status: false,
-        data_fechamento: dataFechamento,
-      });
-      carregarComandas();
+      await axios.put(`http://localhost:5000/comanda/fechar/${idComanda}`);
+      const response = await axios.get(`http://localhost:5000/comanda/${idComanda}/total`);
+  
+      console.log("Retorno completo da API (response.data):", response.data); // Adiciona o log completo
+  
+      // Acessa o total no primeiro elemento do array
+      const total = response.data[0]?.total
+        ? parseFloat(response.data[0].total)
+        : 0;
+  
+      setValorTotalComanda(total); // Atualiza o estado com o valor correto
+      setModalEncerramentoVisible(true); // Abre o modal de encerramento
+      carregarComandas(); // Atualiza a lista de comandas
     } catch (error) {
-      console.error("Erro ao fechar comanda:", error);
+      console.error("Erro ao encerrar comanda:", error);
+      alert("Erro ao encerrar comanda");
     }
   };
+  
+  
+  
+  
 
   // Função para criar uma nova comanda
   const criarComanda = async () => {
@@ -101,9 +115,7 @@ export default function Comanda() {
       <Text style={styles.title}>Comandas</Text>
       <FlatList
         data={comandas}
-        keyExtractor={(item) =>
-          item?.id_comanda ? item.id_comanda.toString() : Math.random().toString()
-        }
+        keyExtractor={(item) => (item?.id_comanda ? item.id_comanda.toString() : Math.random().toString())}
         numColumns={2} // Adicionado para ter dois cards por linha
         renderItem={({ item }: { item: Comanda }) => (
           <View style={styles.card}>
@@ -120,10 +132,11 @@ export default function Comanda() {
               >
                 <Text style={styles.buttonText}>Ver Itens</Text>
               </TouchableOpacity>
+              
               {item.status && (
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => fecharComanda(item.id_comanda)}
+                  onPress={() => encerrarComanda(item.id_comanda)}
                 >
                   <Text style={styles.buttonText}>Fechar Comanda</Text>
                 </TouchableOpacity>
@@ -170,6 +183,30 @@ export default function Comanda() {
           </View>
         </View>
       </Modal>
+
+      {/* Modal de Sucesso ao encerrar a comanda */}
+      <Modal
+      visible={modalEncerramentoVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setModalEncerramentoVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Comanda Encerrada</Text>
+          <Text style={styles.modalSubtitle}>Comanda fechada com sucesso!</Text>
+          <Text style={styles.modalSubtitle}>
+            Total: R$ {(valorTotalComanda ?? 0).toFixed(2)}
+          </Text>
+          <Button
+            title="Fechar"
+            onPress={() => setModalEncerramentoVisible(false)}
+            color="#FFA500" // Laranja
+          />
+        </View>
+      </View>
+    </Modal>
+
 
       <Modal
         visible={modalVisible}

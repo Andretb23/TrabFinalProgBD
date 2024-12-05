@@ -46,9 +46,12 @@ app.delete("/itemcardapio/:id_item_cardapio", itemCardapio.deletar_itemCardapio)
 
 app.get("/comanda", comanda.listar_comanda);
 app.get("/comanda/:id_comanda/itens", comanda.listarItensComanda);
+app.get("/comanda/:id_comanda/total", comanda.mostrar_Valor_Comanda);
 app.get("/comanda/:id_comanda", comanda.selecionar_comanda);
+app.get("/comanda/data/:data", comanda.listarComandasPorData);
 app.post("/comanda/", comanda.cadastrar_comanda);
 app.put("/comanda/:id_comanda", comanda.alterar_comanda);
+app.put("/comanda/fechar/:id_comanda", comanda.encerrarComanda);
 app.delete("/comanda/:id_comanda", comanda.deletar_comanda);
 
 app.get("/itemcardapiocardapio", itemCardapioCardapio.listar_itemCardapioCardapio);
@@ -60,7 +63,6 @@ app.delete("/itemcardapiocardapio/:id_item_cardapio_card", itemCardapioCardapio.
 app.get("/itemComanda", itemComanda.listar_itemComanda);
 app.get("/itemComanda/:id_item_comanda", itemComanda.selecionar_itemComanda);
 app.post("/itemComanda/", itemComanda.cadastrar_itemComanda);
-app.post("/itemComanda/adicionar", itemComanda.adicionarItemNaComanda);
 app.put("/itemComanda/:id_item_comanda", itemComanda.alterar_itemComanda);
 app.delete("/itemComanda/:id_item_comanda", itemComanda.deletar_itemComanda);
 
