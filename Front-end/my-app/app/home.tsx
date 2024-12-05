@@ -11,11 +11,6 @@ interface ItemCardapio {
   preco: string;
 }
 
-interface ItemCardapioCardapio {
-  id_item_cardapio_card: number;
-  id_cardapio: number;
-  id_irem_cardapio: number;
-}
 
 export default function Home() {
   const [dados, setDados] = useState<ItemCardapio[]>([]);
